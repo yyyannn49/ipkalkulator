@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KALKULATOR IP</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+    <style>
+        /* PAKSA WARNA GELAP DI SELURUH HALAMAN */
+        :root {
+            --primary: #8b5cf6;
+            --secondary: #06b6d4;
+            --bg-dark: #020617; /* Hitam pekat */
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        html, body {
+            background-color: var(--bg-dark) !important;
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+            color: #f8fafc;
+            overflow: hidden; /* Mencegah scroll jika tidak perlu */
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-image: 
+                radial-gradient(circle at 10% 10%, rgba(139, 92, 246, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 90% 90%, rgba(6, 182, 212, 0.2) 0%, transparent 50%);
+        }
+
+        .container {
+            background: var(--card-bg);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            padding: 40px;
+            border-radius: 32px;
+            border: 1px solid var(--glass-border);
+            width: 90%;
+            max-width: 450px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h2 {
+            text-align: center;
+            margin: 0 0 8px;
+            background: linear-gradient(to right, #a78bfa, #22d3ee);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+            font-size: 26px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #64748b;
+            font-size: 13px;
+            margin-bottom: 30px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 12px;
+            font-weight: 700;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px 18px;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            color: #fff;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 15px;
+            margin-bottom: 20px;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        input:focus {
+            border-color: var(--secondary);
+            box-shadow: 0 0 15px rgba(6, 182, 212, 0.3);
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        button:hover {
+            transform: scale(1.02);
+            filter: brightness(1.1);
+        }
+
+        .result {
+            margin-top: 25px;
+            display: none;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 20px;
+            padding: 15px;
+            border: 1px solid var(--glass-border);
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .result-item:last-child { border: none; }
+
+        .label-res { font-size: 11px; color: #64748b; font-weight: 600; }
+        .val-res { font-family: 'JetBrains Mono', monospace; font-size: 13px; color: #e2e8f0; }
+        
+        .glow-text { color: #22d3ee; font-weight: 700; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>KALKULATOR IP</h2>
+    <p class="subtitle">made by @mhmdrynhaqqi</p>
+    
+    <label>IP Address</label>
+    <input type="text" id="ip" placeholder="192.168.1.1">
+    
+    <label>Prefix (CIDR)</label>
+    <input type="number" id="cidr" placeholder="24">
+    
+    <button onclick="calculate()">Run Diagnostic</button>
+
+    <div class="result" id="resultBox">
+        <div class="result-item"><span class="label-res">CLASS</span><span class="val-res glow-text" id="resClass">-</span></div>
+        <div class="result-item"><span class="label-res">SUBNET MASK</span><span class="val-res" id="resMask">-</span></div>
+        <div class="result-item"><span class="label-res">NETWORK ID</span><span class="val-res" id="resNet">-</span></div>
+        <div class="result-item"><span class="label-res">BROADCAST</span><span class="val-res" id="resBroad">-</span></div>
+        <div class="result-item"><span class="label-res">USABLE HOSTS</span><span class="val-res" id="resHosts" style="color: #4ade80;">-</span></div>
+    </div>
+</div>
+
+<script>
+    function calculate() {
+        const ip = document.getElementById('ip').value;
+        const cidr = parseInt(document.getElementById('cidr').value);
+        if (!ip || isNaN(cidr)) return alert("Isi data dulu!");
+
+        const parts = ip.split('.').map(Number);
+        const first = parts[0];
+        let cls = first < 128 ? "Class A" : first < 192 ? "Class B" : first < 224 ? "Class C" : "Special";
+
+        let mask = Array(4).fill(0).map((_, i) => {
+            let n = Math.min(Math.max(cidr - i * 8, 0), 8);
+            return 256 - Math.pow(2, 8 - n);
+        });
+
+        const net = parts.map((p, i) => p & mask[i]);
+        const broad = net.map((p, i) => p | (255 ^ mask[i]));
+        const hosts = cidr >= 31 ? 0 : Math.pow(2, 32 - cidr) - 2;
+
+        document.getElementById('resClass').innerText = cls;
+        document.getElementById('resMask').innerText = mask.join('.');
+        document.getElementById('resNet').innerText = net.join('.');
+        document.getElementById('resBroad').innerText = broad.join('.');
+        document.getElementById('resHosts').innerText = hosts.toLocaleString();
+        document.getElementById('resultBox').style.display = 'block';
+    }
+</script>
+
+</body>
+</html>
